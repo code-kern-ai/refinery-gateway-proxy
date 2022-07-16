@@ -1,0 +1,24 @@
+#!/bin/bash
+trap "echo -ne '\nstopping container...' && docker stop refinery-gateway-proxy > /dev/null 2>&1 && echo -ne '\t\t [done]\n'" EXIT
+
+echo -ne 'stopping old container...'
+docker stop refinery-gateway-proxy > /dev/null 2>&1
+echo -ne '\t [done]\n'
+
+echo -ne 'building container...'
+docker build -t refinery-gateway-proxy-dev -f dev.Dockerfile . > /dev/null 2>&1
+echo -ne '\t\t [done]\n'
+
+echo -ne 'starting...'
+docker run -d --rm \
+--name refinery-gateway-proxy \
+--mount type=bind,source="$(pwd)"/,target=/app \
+-e GATEWAY=http://graphql-gateway:80 \
+-e KRATOS=http://kratos:4433 \
+-e CONFIG=http://config-service:80 \
+-v /var/run/docker.sock:/var/run/docker.sock \
+--network dev-setup_default \
+refinery-gateway-proxy-dev > /dev/null 2>&1
+echo -ne '\t\t\t [done]\n'
+
+docker logs -f refinery-gateway-proxy
