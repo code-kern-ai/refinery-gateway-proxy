@@ -13,9 +13,9 @@ echo -ne 'starting...'
 docker run -d --rm \
 --name refinery-gateway-proxy \
 --mount type=bind,source="$(pwd)"/,target=/app \
--e GATEWAY=http://graphql-gateway:80 \
+-e GATEWAY=http://refinery-gateway:80 \
 -e KRATOS=http://kratos:4433 \
--e CONFIG=http://config-service:80 \
+-e CONFIG=http://refinery-config:80 \
 -v /var/run/docker.sock:/var/run/docker.sock \
 --network dev-setup_default \
 refinery-gateway-proxy-dev > /dev/null 2>&1
