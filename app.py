@@ -75,6 +75,31 @@ async def post_import(request: Request, project_id: str):
     return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
 
 
+@app.post("/project/{project_id}/associations")
+async def post_associations(request: Request, project_id: str):
+    try:
+        user_id = get_user_id_from_request(request)
+    except KeyError:
+        return responses.JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error_code": ErrorCodes.UNRECOGNIZED_USER},
+        )
+    request_body = await request.json()
+    url = f"{BASE_URI}/project/{project_id}/associations"
+    resp = requests.post(
+        url,
+        json={
+            "user_id": user_id,
+            "associations": request_body["associations"],
+            "indices": request_body["indices"],
+            "name": request_body["name"],
+            "label_task_name": request_body["label_task_name"],
+            "source_type": request_body["source_type"],
+        },
+    )
+    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+
+
 @app.get("/project/{project_id}")
 def get_details(request: Request, project_id: str):
     try:
