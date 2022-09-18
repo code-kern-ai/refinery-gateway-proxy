@@ -12,6 +12,7 @@ CONFIG_URI = os.getenv("CONFIG")
 
 class ErrorCodes:
     UNRECOGNIZED_USER = "UNRECOGNIZED_USER"
+    FORBIDDEN_USER = "FORBIDDEN_USER"
     PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND"
 
 
@@ -22,6 +23,23 @@ def get_user_id_from_request(request):
     whoami_dict = resp.json()
     user_id = whoami_dict["identity"]["id"]
     return user_id
+
+
+def handle_response(response):
+    if response.status_code == status.HTTP_200_OK:
+        return responses.JSONResponse(
+            status_code=status.HTTP_200_OK, content=response.json()
+        )
+    elif response.status_code == status.HTTP_404_NOT_FOUND:
+        return responses.JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"error_code": ErrorCodes.PROJECT_NOT_FOUND},
+        )
+    elif response.status_code == status.HTTP_403_FORBIDDEN:
+        return responses.JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={"error_code": ErrorCodes.FORBIDDEN_USER},
+        )
 
 
 @app.get("/project/{project_id}/export")
@@ -35,7 +53,7 @@ def get_export(request: Request, project_id: str, num_samples: Optional[int] = N
         )
     url = f"{BASE_URI}/project/{project_id}/export"
     resp = requests.get(url, params={"user_id": user_id, "num_samples": num_samples})
-    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+    return handle_response(resp)
 
 
 @app.get("/project/{project_id}/lookup_list/{lookup_list_id}")
@@ -49,7 +67,7 @@ def get_lookup_list(request: Request, project_id: str, lookup_list_id: str):
         )
     url = f"{BASE_URI}/project/{project_id}/knowledge_base/{lookup_list_id}"
     resp = requests.get(url, params={"user_id": user_id})
-    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+    return handle_response(resp)
 
 
 @app.post("/project/{project_id}/import")
@@ -72,7 +90,7 @@ async def post_import(request: Request, project_id: str):
             "file_import_options": request_body.get("file_import_options"),
         },
     )
-    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+    return handle_response(resp)
 
 
 @app.post("/project/{project_id}/associations")
@@ -97,7 +115,7 @@ async def post_associations(request: Request, project_id: str):
             "source_type": request_body["source_type"],
         },
     )
-    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+    return handle_response(resp)
 
 
 @app.get("/project/{project_id}")
@@ -111,15 +129,7 @@ def get_details(request: Request, project_id: str):
         )
     url = f"{BASE_URI}/project/{project_id}"
     resp = requests.get(url, params={"user_id": user_id})
-    if resp.status_code == 200:
-        return responses.JSONResponse(
-            status_code=status.HTTP_200_OK, content=resp.json()
-        )
-    else:
-        return responses.JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"error_code": ErrorCodes.PROJECT_NOT_FOUND},
-        )
+    return handle_response(resp)
 
 
 @app.get("/project/{project_id}/import/base_config")
@@ -133,7 +143,7 @@ def get_base_config(request: Request, project_id: str):
         )
     url = f"{CONFIG_URI}/base_config"
     resp = requests.get(url)
-    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+    return handle_response(resp)
 
 
 @app.get("/project/{project_id}/import/task/{task_id}")
@@ -147,4 +157,4 @@ def get_details(request: Request, project_id: str, task_id: str):
         )
     url = f"{BASE_URI}/project/{project_id}/import/task/{task_id}"
     resp = requests.get(url, params={"user_id": user_id})
-    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
+    return handle_response(resp)
