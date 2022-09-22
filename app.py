@@ -70,8 +70,8 @@ def get_lookup_list(request: Request, project_id: str, lookup_list_id: str):
     return handle_response(resp)
 
 
-@app.post("/project/{project_id}/import")
-async def post_import(request: Request, project_id: str):
+@app.post("/project/{project_id}/import_file")
+async def post_import_file(request: Request, project_id: str):
     try:
         user_id = get_user_id_from_request(request)
     except KeyError:
@@ -80,7 +80,7 @@ async def post_import(request: Request, project_id: str):
             content={"error_code": ErrorCodes.UNRECOGNIZED_USER},
         )
     request_body = await request.json()
-    url = f"{BASE_URI}/project/{project_id}/import"
+    url = f"{BASE_URI}/project/{project_id}/import_file"
     resp = requests.post(
         url,
         json={
@@ -91,6 +91,27 @@ async def post_import(request: Request, project_id: str):
         },
     )
     return handle_response(resp)
+
+
+@app.post("/project/{project_id}/import_json")
+async def post_import_json(request: Request, project_id: str):
+    try:
+        user_id = get_user_id_from_request(request)
+    except KeyError:
+        return responses.JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={"error_code": ErrorCodes.UNRECOGNIZED_USER},
+        )
+    request_body = await request.json()
+    url = f"{BASE_URI}/project/{project_id}/import_json"
+    resp = requests.post(
+        url,
+        json={
+            "user_id": user_id,
+            "records": request_body["records"],
+        },
+    )
+    return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
 
 
 @app.post("/project/{project_id}/associations")
