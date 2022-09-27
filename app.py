@@ -109,6 +109,8 @@ async def post_import_json(request: Request, project_id: str):
         json={
             "user_id": user_id,
             "records": request_body["records"],
+            "request_uuid": request_body["request_uuid"],
+            "is_last": request_body["is_last"],
         },
     )
     return responses.JSONResponse(status_code=status.HTTP_200_OK, content=resp.json())
