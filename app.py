@@ -181,3 +181,9 @@ def get_details(request: Request, project_id: str, task_id: str):
     url = f"{BASE_URI}/project/{project_id}/import/task/{task_id}"
     resp = requests.get(url, params={"user_id": user_id})
     return handle_response(resp)
+
+
+@app.get("/healthcheck")
+def healthcheck() -> responses.PlainTextResponse:
+    headers = {"APP": "OK"}
+    return responses.PlainTextResponse("OK", headers=headers)
