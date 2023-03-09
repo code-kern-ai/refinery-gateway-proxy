@@ -185,5 +185,4 @@ def get_details(request: Request, project_id: str, task_id: str):
 
 @app.get("/healthcheck")
 def healthcheck() -> responses.PlainTextResponse:
-    headers = {"APP": "OK"}
-    return responses.PlainTextResponse("OK", headers=headers)
+    return responses.PlainTextResponse("OK")
