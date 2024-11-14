@@ -7,7 +7,6 @@ app = FastAPI()
 
 BASE_URI = os.getenv("GATEWAY")
 KRATOS_URI = os.getenv("KRATOS")
-CONFIG_URI = os.getenv("CONFIG")
 
 
 class ErrorCodes:
@@ -155,8 +154,8 @@ def get_details(request: Request, project_id: str):
     return handle_response(resp)
 
 
-@app.get("/project/{project_id}/import/base_config")
-def get_base_config(request: Request, project_id: str):
+@app.get("/project/{project_id}/import/full_config")
+def get_full_config(request: Request, project_id: str):
     try:
         get_user_id_from_request(request)
     except KeyError:
@@ -164,7 +163,7 @@ def get_base_config(request: Request, project_id: str):
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"error_code": ErrorCodes.UNRECOGNIZED_USER},
         )
-    url = f"{CONFIG_URI}/base_config"
+    url = f"{BASE_URI}/full_config"
     resp = requests.get(url)
     return handle_response(resp)
 
